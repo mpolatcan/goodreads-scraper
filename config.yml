@@ -17,6 +17,6 @@ goodreads:
     ROTATING_PROXY_PAGE_RETRY_TIMES: 10
     ROTATING_PROXY_LOGSTATS_INTERVAL: 20
     ITEM_PIPELINES:
-      pipelines.book_getter.BookGetterPipeline: 1
+      pipelines.book_info_writer.BookInfoWriterPipeline: 1
       scrapy.pipelines.images.ImagesPipeline: 2
     IMAGES_STORE: .

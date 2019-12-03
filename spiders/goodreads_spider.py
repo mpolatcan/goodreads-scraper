@@ -20,9 +20,20 @@ class GoodreadsSpider(Spider):
     SELECTOR_BOOK_TITLE = "h1[id=bookTitle]::text"
     SELECTOR_BOOK_AUTHOR = "a[class=authorName] span[itemprop=name]::text"
     SELECTOR_BOOK_RATING = "span[itemprop=ratingValue]::text"
-    SELECTOR_BOOK_DESCRIPTION = "div[id=description]"
     SELECTOR_BOOK_COVER_ENLARGE = "div[class=editionCover] img::attr(src)"
     SELECTOR_BOOK_SERIES = "h2[id=bookSeries] a::text"
+    SELECTOR_BOOK_DESCRIPTION_LONG = "div[id=description] span[id=freeText{data_text_id}]"
+    SELECTOR_BOOK_DESCRIPTION_SHORT = "div[id=description] span"
+    SELECTOR_DATA_TEXT_ID = "div[id=description] a::attr(data-text-id)"
+    REGEX_GENRES_URL = r"/genres/+"
+    REGEX_GENRES_BOOKLIST_URL = r"/list/show/+"
+    REGEX_GENRES_BOOKLIST_BOOK_URL = r"/book/show/+"
+    ITEM_FIELD_TITLE = "title"
+    ITEM_FIELD_AUTHOR = "author"
+    ITEM_FIELD_RATING = "rating"
+    ITEM_FIELD_DESCRIPTION = "description"
+    ITEM_FIELD_SERIES = "series"
+    ITEM_FIELD_IMAGE_URLS = "image_urls"
 
     def __init__(self, url):
         super(GoodreadsSpider, self).__init__()
@@ -32,11 +43,11 @@ class GoodreadsSpider(Spider):
         yield Request(self.__url, callback=self.__genre_urls)
 
     def __genre_urls(self, response):
-        for link in LinkExtractor(allow=r"/genres/+").extract_links(response):
+        for link in LinkExtractor(allow=GoodreadsSpider.REGEX_GENRES_URL).extract_links(response):
             yield Request(url=link.url, callback=self.__genre_booklists_urls)
 
     def __genre_booklists_urls(self, response):
-        for link in LinkExtractor(allow=r"/list/show/+").extract_links(response):
+        for link in LinkExtractor(allow=GoodreadsSpider.REGEX_GENRES_BOOKLIST_URL).extract_links(response):
             yield Request(url=link.url, callback=self.__genre_booklists_pagination_urls, cb_kwargs={
                 GoodreadsSpider.KEY_GENRE_BASE_URL: link.url
             })
@@ -61,16 +72,21 @@ class GoodreadsSpider(Spider):
             yield Request(url=page_url, callback=self.__genre_booklists_book_urls)
 
     def __genre_booklists_book_urls(self, response):
-        for link in LinkExtractor("/book/show/+").extract_links(response):
+        for link in LinkExtractor(allow=GoodreadsSpider.REGEX_GENRES_BOOKLIST_BOOK_URL).extract_links(response):
             yield Request(url=link.url, callback=self.__genre_booklists_book_parse)
 
     def __genre_booklists_book_parse(self, response):
+        data_text_id = response.css(GoodreadsSpider.SELECTOR_DATA_TEXT_ID).get()
+
         book = ItemLoader(item=BookItem(), response=response)
-        book.add_css("title", GoodreadsSpider.SELECTOR_BOOK_TITLE)
-        book.add_css("author", GoodreadsSpider.SELECTOR_BOOK_AUTHOR)
-        book.add_css("rating", GoodreadsSpider.SELECTOR_BOOK_RATING)
-        book.add_css("description", GoodreadsSpider.SELECTOR_BOOK_DESCRIPTION)
-        book.add_css("series", GoodreadsSpider.SELECTOR_BOOK_SERIES)
-        book.add_css("image_urls", GoodreadsSpider.SELECTOR_BOOK_COVER_ENLARGE)
+        book.add_css(GoodreadsSpider.ITEM_FIELD_TITLE, GoodreadsSpider.SELECTOR_BOOK_TITLE)
+        book.add_css(GoodreadsSpider.ITEM_FIELD_AUTHOR, GoodreadsSpider.SELECTOR_BOOK_AUTHOR)
+        book.add_css(GoodreadsSpider.ITEM_FIELD_RATING, GoodreadsSpider.SELECTOR_BOOK_RATING)
+        book.add_css(
+            GoodreadsSpider.ITEM_FIELD_DESCRIPTION,
+            GoodreadsSpider.SELECTOR_BOOK_DESCRIPTION_LONG.format(data_text_id=data_text_id) if data_text_id else GoodreadsSpider.SELECTOR_BOOK_DESCRIPTION_SHORT
+        )
+        book.add_css(GoodreadsSpider.ITEM_FIELD_SERIES, GoodreadsSpider.SELECTOR_BOOK_SERIES)
+        book.add_css(GoodreadsSpider.ITEM_FIELD_IMAGE_URLS, GoodreadsSpider.SELECTOR_BOOK_COVER_ENLARGE)
 
         return book.load_item()
