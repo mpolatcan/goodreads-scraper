@@ -1,18 +1,17 @@
 # Written by Mutlu Polatcan
 # 02.12.2019
-
-from scrapy import Spider, Request
 import json
+from scrapy import Spider, Request
+from src.utils.constants import Constants
 
 
 class UserAgentSpider(Spider):
     name = "useragent_spider"
-    SELECTOR_USER_AGENT = "div[id=liste] ul a::text"
 
-    def __init__(self, url, useragents_filename):
+    def __init__(self, config):
         super(UserAgentSpider, self).__init__()
-        self.__url = url
-        self.__useragents_filename = useragents_filename
+        self.__url = config[Constants.KEY_URL]
+        self.__useragents_filename = config[Constants.KEY_OUTPUT_FILENAME]
 
     def start_requests(self):
         yield Request(url=self.__url, callback=self.parse)
@@ -20,7 +19,7 @@ class UserAgentSpider(Spider):
     def parse(self, response):
         user_agents = []
 
-        for row in response.css(UserAgentSpider.SELECTOR_USER_AGENT).getall():
+        for row in response.css(Constants.SELECTOR_USER_AGENT).getall():
             user_agents.append(row)
 
         json.dump(user_agents, open(self.__useragents_filename, "w"))
