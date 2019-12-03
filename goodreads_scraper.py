@@ -16,13 +16,11 @@ if __name__ == "__main__":
 
     @defer.inlineCallbacks
     def crawl_spiders():
-        '''
         yield runner.crawl(
             UserAgentSpider,
             useragent_spider_config["url"],
             useragent_spider_config["output_filename"]
         )
-        '''
 
         yield runner.crawl(
             ProxySpider,

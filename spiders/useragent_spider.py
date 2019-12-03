@@ -7,7 +7,7 @@ import json
 
 class UserAgentSpider(Spider):
     name = "useragent_spider"
-    SELECTOR_USER_AGENT = "td[class=useragent] a::text"
+    SELECTOR_USER_AGENT = "div[id=liste] ul a::text"
 
     def __init__(self, url, useragents_filename):
         super(UserAgentSpider, self).__init__()
