@@ -12,23 +12,31 @@ class GoodreadsSpider(Spider):
 
     def __init__(self, config):
         super(GoodreadsSpider, self).__init__()
-        self.__url = config[Constants.KEY_URL]
-        self.__genres = config[Constants.KEY_GENRES]
+        self.__url = config[Constants.CONFIG_KEY_URL]
+        self.__genres = config.get(Constants.CONFIG_KEY_GENRES, None)
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        return super(GoodreadsSpider, cls).from_crawler(crawler, crawler.settings)
 
     def start_requests(self):
         yield Request(self.__url, callback=self.__genre_urls)
 
     def __genre_urls(self, response):
         for link in LinkExtractor(allow=Constants.REGEX_GENRES_URL).extract_links(response):
-            # Genre filtering
-            for genre in self.__genres:
-                if link.url.find(genre) != -1:
-                    yield Request(url=link.url, callback=self.__genre_booklists_urls)
+            if self.__genres:
+                # Genre filtering
+                for genre in self.__genres:
+                    if link.url.find(genre) != -1:
+                        yield Request(url=link.url, callback=self.__genre_booklists_urls)
+            else:
+                yield Request(url=link.url, callback=self.__genre_booklists_urls)
 
     def __genre_booklists_urls(self, response):
         for link in LinkExtractor(allow=Constants.REGEX_GENRES_BOOKLIST_URL).extract_links(response):
             yield Request(url=link.url, callback=self.__genre_booklists_pagination_urls, cb_kwargs={
-                Constants.KEY_GENRE_BASE_URL: link.url
+                Constants.KEY_GENRE_BASE_URL: link.url,
+                Constants.KEY_GENRE_TITLE: response.css(Constants.SELECTOR_GENRE_TITLE).get()
             })
 
     def __genre_booklists_pagination_urls(self, response, **kwargs):
@@ -48,16 +56,17 @@ class GoodreadsSpider(Spider):
             print("List URL: {url} has a single page".format(url=kwargs[Constants.KEY_GENRE_BASE_URL]))
 
         for page_url in page_urls:
-            yield Request(url=page_url, callback=self.__genre_booklists_book_urls)
+            yield Request(url=page_url, callback=self.__genre_booklists_book_urls, cb_kwargs=kwargs)
 
-    def __genre_booklists_book_urls(self, response):
+    def __genre_booklists_book_urls(self, response, **kwargs):
         for link in LinkExtractor(allow=Constants.REGEX_GENRES_BOOKLIST_BOOK_URL).extract_links(response):
-            yield Request(url=link.url, callback=self.__genre_booklists_book_parse)
+            yield Request(url=link.url, callback=self.__genre_booklists_book_parse, cb_kwargs=kwargs)
 
-    def __genre_booklists_book_parse(self, response):
+    def __genre_booklists_book_parse(self, response, **kwargs):
         data_text_id = response.css(Constants.SELECTOR_DATA_TEXT_ID).get()
 
         book = ItemLoader(item=BookItem(), response=response)
+        book.add_value(Constants.ITEM_FIELD_GENRE, kwargs[Constants.KEY_GENRE_TITLE])
         book.add_css(Constants.ITEM_FIELD_TITLE, Constants.SELECTOR_BOOK_TITLE)
         book.add_css(Constants.ITEM_FIELD_AUTHOR, Constants.SELECTOR_BOOK_AUTHOR)
         book.add_css(Constants.ITEM_FIELD_RATING, Constants.SELECTOR_BOOK_RATING)

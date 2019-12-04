@@ -15,27 +15,26 @@ class GoodreadsScraper:
     def __init__(self, config_filename):
         self.__config = yaml.safe_load(open(config_filename, "r"))
         self.__runner = CrawlerRunner()
-        self.__proxy_spider_config = self.__config[Constants.KEY_PROXY]
-        self.__goodreads_spider_config = self.__config[Constants.KEY_GOODREADS]
 
-    def __update_goodreads_spider_settings(self):
-        GoodreadsSpider.custom_settings = {
-            Constants.KEY_ROTATING_PROXY_LIST: json.load(open(self.__goodreads_spider_config[Constants.KEY_PROXY_FILENAME], "r"))
-        }
-        GoodreadsSpider.custom_settings.update(self.__goodreads_spider_config[Constants.KEY_CUSTOM_SETTINGS])
+    def __load_crawler_settings(self):
+        GoodreadsSpider.custom_settings = self.__config[Constants.CONFIG_KEY_GOODREADS]
+        ProxySpider.custom_settings = self.__config[Constants.CONFIG_KEY_PROXY]
 
     @defer.inlineCallbacks
     def __run_spiders_sequentially(self):
-        yield self.__runner.crawl(ProxySpider, self.__proxy_spider_config)
+        yield self.__runner.crawl(ProxySpider)
 
-        self.__update_goodreads_spider_settings()
+        GoodreadsSpider.custom_settings.update({
+            Constants.KEY_ROTATING_PROXY_LIST: json.load(open(self.__config[Constants.CONFIG_KEY_PROXY][Constants.CONFIG_KEY_OUTPUT_FILENAME], "r")
+        )})
 
-        yield self.__runner.crawl(GoodreadsSpider, self.__goodreads_spider_config)
+        yield self.__runner.crawl(GoodreadsSpider)
 
         reactor.stop()
 
     def run(self):
         configure_logging()
+        self.__load_crawler_settings()
         self.__run_spiders_sequentially()
         reactor.run()
 

@@ -5,5 +5,4 @@
 ## TODO 
 
 - Documentation
-- Configuration updates
 - New datas (reviews, quotes etc.)

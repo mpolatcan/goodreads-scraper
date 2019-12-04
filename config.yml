@@ -1,21 +1,30 @@
-proxy:
-  url: https://free-proxy-list.net/
-  output_filename: proxies.json
+PROXY:
+  URL: https://free-proxy-list.net/
+  OUTPUT_FILENAME: proxies.json
 
-goodreads:
-  url: https://goodreads.com
-  proxy_filename: proxies.json
-  genres:
+GOODREADS:
+  URL: https://goodreads.com
+
+  GENRES:
     - fantasy
-  custom_settings:
-    DOWNLOADER_MIDDLEWARES:
-      rotating_proxies.middlewares.RotatingProxyMiddleware: 610
-    ITEM_PIPELINES:
-      src.pipelines.book_info_writer.BookInfoWriterPipeline: 1
-      scrapy.pipelines.images.ImagesPipeline: 2
-    RETRY_TIMES: 10
-    DOWNLOAD_TIMEOUT: 20
-    CONCURRENT_REQUESTS_PER_DOMAIN: 2
-    ROTATING_PROXY_PAGE_RETRY_TIMES: 10
-    ROTATING_PROXY_LOGSTATS_INTERVAL: 20
-    IMAGES_STORE: .
+
+  OUTPUT_TO: CSV
+
+  CSV:
+    OUTPUT_TYPE: csv
+    FILENAME: books.csv
+    DELIMITER: ";"
+
+  DOWNLOADER_MIDDLEWARES:
+    rotating_proxies.middlewares.RotatingProxyMiddleware: 610
+
+  ITEM_PIPELINES:
+    src.pipelines.book_info_writer.BookInfoWriterPipeline: 1
+    src.pipelines.book_cover_saver.BookCoverSaverPipeline: 2
+
+  RETRY_TIMES: 10
+  DOWNLOAD_TIMEOUT: 20
+  CONCURRENT_REQUESTS_PER_DOMAIN: 4
+  ROTATING_PROXY_PAGE_RETRY_TIMES: 10
+  ROTATING_PROXY_LOGSTATS_INTERVAL: 20
+  IMAGES_STORE: .

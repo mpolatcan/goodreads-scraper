@@ -10,8 +10,12 @@ class ProxySpider(Spider):
 
     def __init__(self, config):
         super(ProxySpider, self).__init__()
-        self.__url = config[Constants.KEY_URL]
-        self.__proxies_filename = config[Constants.KEY_OUTPUT_FILENAME]
+        self.__url = config[Constants.CONFIG_KEY_URL]
+        self.__proxies_filename = config[Constants.CONFIG_KEY_OUTPUT_FILENAME]
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        return super(ProxySpider, cls).from_crawler(crawler, crawler.settings)
 
     def start_requests(self):
         yield Request(url=self.__url, callback=self.parse)
