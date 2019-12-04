@@ -2,14 +2,11 @@ proxy:
   url: https://free-proxy-list.net/
   output_filename: proxies.json
 
-useragent:
-  url: http://useragentstring.com/pages/useragentstring.php?name=Chrome
-  output_filename: useragents.json
-
 goodreads:
   url: https://goodreads.com
   proxy_filename: proxies.json
-  useragents_filename: useragents.json
+  genres:
+    - fantasy
   custom_settings:
     DOWNLOADER_MIDDLEWARES:
       rotating_proxies.middlewares.RotatingProxyMiddleware: 610

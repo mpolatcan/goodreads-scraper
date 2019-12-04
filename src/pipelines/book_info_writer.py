@@ -17,9 +17,8 @@ class BookInfoWriterPipeline:
                                               if len(item[Constants.ITEM_FIELD_AUTHOR]) > 1 \
                                               else item[Constants.ITEM_FIELD_AUTHOR][0].strip()
         item[Constants.ITEM_FIELD_RATING] = item[Constants.ITEM_FIELD_RATING][0].strip()
-
         item[Constants.ITEM_FIELD_DESCRIPTION] = re.sub(
-            re.compile(Constants.HTML_REGEX), "", item[Constants.ITEM_FIELD_DESCRIPTION][0].strip()
+            re.compile(Constants.HTML_REGEX), "", item[Constants.ITEM_FIELD_DESCRIPTION][0].strip().replace("\n", "")
         ) if item.get(Constants.ITEM_FIELD_DESCRIPTION, None) is not None else ""
 
         file = open("books.csv", "a+")

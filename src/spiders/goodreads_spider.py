@@ -13,13 +13,17 @@ class GoodreadsSpider(Spider):
     def __init__(self, config):
         super(GoodreadsSpider, self).__init__()
         self.__url = config[Constants.KEY_URL]
+        self.__genres = config[Constants.KEY_GENRES]
 
     def start_requests(self):
         yield Request(self.__url, callback=self.__genre_urls)
 
     def __genre_urls(self, response):
         for link in LinkExtractor(allow=Constants.REGEX_GENRES_URL).extract_links(response):
-            yield Request(url=link.url, callback=self.__genre_booklists_urls)
+            # Genre filtering
+            for genre in self.__genres:
+                if link.url.find(genre) != -1:
+                    yield Request(url=link.url, callback=self.__genre_booklists_urls)
 
     def __genre_booklists_urls(self, response):
         for link in LinkExtractor(allow=Constants.REGEX_GENRES_BOOKLIST_URL).extract_links(response):
