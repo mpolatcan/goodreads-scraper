@@ -26,7 +26,7 @@ class ProxySpider(Spider):
         for row in response.css(Constants.SELECTOR_PROXY_LIST_ROW):
             proxy_info = row.css(Constants.SELECTOR_PROXY_INFO).getall()
 
-            # If HTTP "yes" then add to proxy list
+            # If HTTPS "yes" then add to proxy list
             if proxy_info[6] == "yes":
                 proxies.append("{ip}:{port}".format(ip=proxy_info[0], port=proxy_info[1]))
 

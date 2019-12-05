@@ -15,6 +15,18 @@ GOODREADS:
     FILENAME: books.csv
     DELIMITER: ";"
 
+  # TODO Define Mongo configurations
+  MONGO:
+    OUTPUT_TYPE: mongo
+
+  # TODO Define Google Drive configurations
+  DRIVE:
+    OUTPUT_TYPE: drive
+
+  # TODO Define Google Cloud Storage configurations
+  GCS:
+    OUTPUT_TYPE: gcs
+
   DOWNLOADER_MIDDLEWARES:
     rotating_proxies.middlewares.RotatingProxyMiddleware: 610
 
