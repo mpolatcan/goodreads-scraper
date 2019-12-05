@@ -25,7 +25,4 @@ class BookItem(Item):
     pages = Field(output_processor=CustomTakeFirst())
     edition = Field(output_processor=CustomTakeFirst())
     edition_language = Field(output_processor=CustomTakeFirst())
-    publish_info = Field()
-    publisher = Field()
-    publish_date = Field()
     image_urls = Field()

@@ -78,7 +78,6 @@ class GoodreadsSpider(Spider):
         book.add_css(Constants.ITEM_FIELD_SERIES, Constants.SELECTOR_BOOK_SERIES)
         book.add_css(Constants.ITEM_FIELD_BOOK_FORMAT, Constants.SELECTOR_BOOK_FORMAT)
         book.add_css(Constants.ITEM_FIELD_PAGES, Constants.SELECTOR_BOOK_PAGES)
-        book.add_css(Constants.ITEM_FIELD_PUBLISH_INFO, Constants.SELECTOR_BOOK_PUBLISH_INFO)
         book.add_css(Constants.ITEM_FIELD_ISBN, Constants.SELECTOR_BOOK_ISBN if isbn else Constants.SELECTOR_BOOK_ASIN)
         book.add_css(Constants.ITEM_FIELD_EDITION, Constants.SELECTOR_BOOK_EDITION)
         book.add_css(Constants.ITEM_FIELD_EDITION_LANGUAGE, Constants.SELECTOR_BOOK_EDITION_LANGUAGE)

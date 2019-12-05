@@ -29,8 +29,6 @@ class BookInfoWriterPipeline:
             item.get(Constants.ITEM_FIELD_RATING, ""),
             item.get(Constants.ITEM_FIELD_DESCRIPTION, ""),
             item.get(Constants.ITEM_FIELD_BOOK_FORMAT, ""),
-            item.get(Constants.ITEM_FIELD_PUBLISHER, ""),
-            item.get(Constants.ITEM_FIELD_PUBLISH_DATE, ""),
             item.get(Constants.ITEM_FIELD_EDITION, ""),
             item.get(Constants.ITEM_FIELD_PAGES, ""),
             item.get(Constants.ITEM_FIELD_ISBN, ""),
@@ -56,10 +54,6 @@ class BookInfoWriterPipeline:
             re.compile(Constants.HTML_REGEX), "", item.get(Constants.ITEM_FIELD_DESCRIPTION, "").replace("\n", "")
         )
         item[Constants.ITEM_FIELD_PAGES] = item[Constants.ITEM_FIELD_PAGES].split()[0] if item.get(Constants.ITEM_FIELD_PAGES, "") != "" else ""
-
-        publish_info = item.get(Constants.ITEM_FIELD_PUBLISH_INFO)[1].split("\n")
-        item[Constants.ITEM_FIELD_PUBLISH_DATE] = publish_info[2].strip()
-        item[Constants.ITEM_FIELD_PUBLISHER] = publish_info[3].strip().replace("by ", "")
 
         # If book doesn't have ISBN or ASIN don't save its info
         if item.get(Constants.ITEM_FIELD_ISBN, "") != "":
